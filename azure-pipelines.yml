@@ -30,12 +30,12 @@ resources:
   repositories:
   - repository: sonic-sairedis
     type: github
-    name: sonic-net/sonic-sairedis
-    endpoint: sonic-net
+    name: arthur-cog-sonic/sonic-sairedis
+    endpoint: arthur-cog-sonic
   - repository: sonic-swss
     type: github
-    name: sonic-net/sonic-swss
-    endpoint: sonic-net
+    name: arthur-cog-sonic/sonic-swss
+    endpoint: arthur-cog-sonic
 
 parameters:
   - name: debian_version
@@ -194,51 +194,53 @@ stages:
       archive_gcov: true
       debian_version: ${{ parameters.debian_version }}
 
-- stage: BuildArm
-  dependsOn: Build
-  condition: succeeded('Build')
-  jobs:
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: armhf
-      timeout: 180
-      pool: sonicso1ES-armhf
-      artifact_name: sonic-swss-common-${{ parameters.debian_version }}.armhf
-      debian_version: ${{ parameters.debian_version }}
+# ARM builds commented out - no hardware available
+# - stage: BuildArm
+#   dependsOn: Build
+#   condition: succeeded('Build')
+#   jobs:
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: armhf
+#       timeout: 180
+#       pool: sonic-build
+#       artifact_name: sonic-swss-common-${{ parameters.debian_version }}.armhf
+#       debian_version: ${{ parameters.debian_version }}
+#
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: arm64
+#       timeout: 180
+#       pool: sonic-build
+#       artifact_name: sonic-swss-common-${{ parameters.debian_version }}.arm64
+#       debian_version: ${{ parameters.debian_version }}
 
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: arm64
-      timeout: 180
-      pool: sonicso1ES-arm64
-      artifact_name: sonic-swss-common-${{ parameters.debian_version }}.arm64
-      debian_version: ${{ parameters.debian_version }}
-
-- stage: BuildTrixie
-  dependsOn: BuildArm
-  condition: succeeded('BuildArm')
-  jobs:
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: amd64
-      artifact_name: sonic-swss-common-trixie
-      debian_version: trixie
-
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: armhf
-      timeout: 180
-      pool: sonicso1ES-armhf
-      artifact_name: sonic-swss-common-trixie.armhf
-      debian_version: trixie
-
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: arm64
-      timeout: 180
-      pool: sonicso1ES-arm64
-      artifact_name: sonic-swss-common-trixie.arm64
-      debian_version: trixie
+# Trixie builds commented out - depends on ARM builds
+# - stage: BuildTrixie
+#   dependsOn: BuildArm
+#   condition: succeeded('BuildArm')
+#   jobs:
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: amd64
+#       artifact_name: sonic-swss-common-trixie
+#       debian_version: trixie
+#
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: armhf
+#       timeout: 180
+#       pool: sonic-build
+#       artifact_name: sonic-swss-common-trixie.armhf
+#       debian_version: trixie
+#
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: arm64
+#       timeout: 180
+#       pool: sonic-build
+#       artifact_name: sonic-swss-common-trixie.arm64
+#       debian_version: trixie
 
 - stage: BuildSairedis
   dependsOn: Build
