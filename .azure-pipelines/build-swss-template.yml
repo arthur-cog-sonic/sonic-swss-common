@@ -88,41 +88,42 @@ jobs:
         libsaimetadata-dev_*.deb
         syncd-vs_*.deb
     displayName: "Download pre-stage built ${{ parameters.sairedis_artifact_name }}"
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      source: specific
-      project: build
-      pipeline: Azure.sonic-buildimage.common_libs
-      runVersion: 'latestFromBranch'
-      runBranch: 'refs/heads/$(BUILD_BRANCH)'
-      path: $(Build.ArtifactStagingDirectory)/download
-      artifact: common-lib
-      patterns: |
-        target/debs/${{ parameters.debian_version }}/libnl-3*.deb
-        target/debs/${{ parameters.debian_version }}/libnl-genl*.deb
-        target/debs/${{ parameters.debian_version }}/libnl-route*.deb
-        target/debs/${{ parameters.debian_version }}/libnl-nf*.deb
-        target/debs/${{ parameters.debian_version }}/libyang-*_1.0*.deb
-        target/debs/${{ parameters.debian_version }}/libyang_1.0*.deb
-        target/debs/${{ parameters.debian_version }}/libprotobuf*.deb
-        target/debs/${{ parameters.debian_version }}/libprotoc*.deb
-        target/debs/${{ parameters.debian_version }}/protobuf-compiler*.deb
-    displayName: "Download common libs"
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      source: specific
-      project: build
-      pipeline: sonic-net.sonic-dash-api
-      ${{ if eq(parameters.arch, 'amd64') }}:
-        artifact: sonic-dash-api
-      ${{ else }}:
-        artifact: sonic-dash-api.${{ parameters.arch }}
-      runVersion: 'latestFromBranch'
-      runBranch: 'refs/heads/$(BUILD_BRANCH)'
-      path: $(Build.ArtifactStagingDirectory)/download
-      patterns: |
-        libdashapi*.deb
-    displayName: "Download sonic-dash-api"
+  # External pipeline downloads commented out - pipelines not available in Cisco-SONiC-PoC org
+  # - task: DownloadPipelineArtifact@2
+  #   inputs:
+  #     source: specific
+  #     project: build
+  #     pipeline: Azure.sonic-buildimage.common_libs
+  #     runVersion: 'latestFromBranch'
+  #     runBranch: 'refs/heads/$(BUILD_BRANCH)'
+  #     path: $(Build.ArtifactStagingDirectory)/download
+  #     artifact: common-lib
+  #     patterns: |
+  #       target/debs/${{ parameters.debian_version }}/libnl-3*.deb
+  #       target/debs/${{ parameters.debian_version }}/libnl-genl*.deb
+  #       target/debs/${{ parameters.debian_version }}/libnl-route*.deb
+  #       target/debs/${{ parameters.debian_version }}/libnl-nf*.deb
+  #       target/debs/${{ parameters.debian_version }}/libyang-*_1.0*.deb
+  #       target/debs/${{ parameters.debian_version }}/libyang_1.0*.deb
+  #       target/debs/${{ parameters.debian_version }}/libprotobuf*.deb
+  #       target/debs/${{ parameters.debian_version }}/libprotoc*.deb
+  #       target/debs/${{ parameters.debian_version }}/protobuf-compiler*.deb
+  #   displayName: "Download common libs"
+  # - task: DownloadPipelineArtifact@2
+  #   inputs:
+  #     source: specific
+  #     project: build
+  #     pipeline: sonic-net.sonic-dash-api
+  #     ${{ if eq(parameters.arch, 'amd64') }}:
+  #       artifact: sonic-dash-api
+  #     ${{ else }}:
+  #       artifact: sonic-dash-api.${{ parameters.arch }}
+  #     runVersion: 'latestFromBranch'
+  #     runBranch: 'refs/heads/$(BUILD_BRANCH)'
+  #     path: $(Build.ArtifactStagingDirectory)/download
+  #     patterns: |
+  #       libdashapi*.deb
+  #   displayName: "Download sonic-dash-api"
 
   - script: |
       set -ex
