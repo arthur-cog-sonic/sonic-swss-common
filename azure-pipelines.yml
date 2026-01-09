@@ -30,12 +30,12 @@ resources:
   repositories:
   - repository: sonic-sairedis
     type: github
-    name: sonic-net/sonic-sairedis
-    endpoint: sonic-net
+    name: arthur-cog-sonic/sonic-sairedis
+    endpoint: arthur-cog-sonic
   - repository: sonic-swss
     type: github
-    name: sonic-net/sonic-swss
-    endpoint: sonic-net
+    name: arthur-cog-sonic/sonic-swss
+    endpoint: arthur-cog-sonic
 
 parameters:
   - name: debian_version
@@ -132,29 +132,30 @@ stages:
             https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-${ARCH}
         sudo chmod 755 /usr/local/bin/bazel
       displayName: "Install dependencies"
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        source: specific
-        project: build
-        pipeline: Azure.sonic-buildimage.common_libs
-        runVersion: 'latestFromBranch'
-        runBranch: 'refs/heads/$(BUILD_BRANCH)'
-        path: $(Build.ArtifactStagingDirectory)/download
-        artifact: common-lib
-        patterns: |
-          target/debs/${{ parameters.debian_version }}/libyang-*_1.0*.deb
-          target/debs/${{ parameters.debian_version }}/libyang_1.0*.deb
-          target/debs/${{ parameters.debian_version }}/libyang-cpp_*.deb
-          target/debs/${{ parameters.debian_version }}/python3-yang_*.deb
-      displayName: "Download yang deb from amd64 common lib"
-    - script: |
-        set -ex
-        sudo dpkg -i $(Build.ArtifactStagingDirectory)/download/target/debs/${{ parameters.debian_version }}/libyang_1.0*.deb \
-                     $(Build.ArtifactStagingDirectory)/download/target/debs/${{ parameters.debian_version }}/libyang-*_1.0*.deb \
-                     $(Build.ArtifactStagingDirectory)/download/target/debs/${{ parameters.debian_version }}/libyang-cpp_*.deb \
-                     $(Build.ArtifactStagingDirectory)/download/target/debs/${{ parameters.debian_version }}/python3-yang_*.deb
-      workingDirectory: $(Build.ArtifactStagingDirectory)
-      displayName: "Install yang deb from common lib"
+    # External pipeline download commented out - pipeline not available in Cisco-SONiC-PoC org
+    # - task: DownloadPipelineArtifact@2
+    #   inputs:
+    #     source: specific
+    #     project: build
+    #     pipeline: Azure.sonic-buildimage.common_libs
+    #     runVersion: 'latestFromBranch'
+    #     runBranch: 'refs/heads/$(BUILD_BRANCH)'
+    #     path: $(Build.ArtifactStagingDirectory)/download
+    #     artifact: common-lib
+    #     patterns: |
+    #       target/debs/${{ parameters.debian_version }}/libyang-*_1.0*.deb
+    #       target/debs/${{ parameters.debian_version }}/libyang_1.0*.deb
+    #       target/debs/${{ parameters.debian_version }}/libyang-cpp_*.deb
+    #       target/debs/${{ parameters.debian_version }}/python3-yang_*.deb
+    #   displayName: "Download yang deb from amd64 common lib"
+    # - script: |
+    #     set -ex
+    #     sudo dpkg -i $(Build.ArtifactStagingDirectory)/download/target/debs/${{ parameters.debian_version }}/libyang_1.0*.deb \
+    #                  $(Build.ArtifactStagingDirectory)/download/target/debs/${{ parameters.debian_version }}/libyang-*_1.0*.deb \
+    #                  $(Build.ArtifactStagingDirectory)/download/target/debs/${{ parameters.debian_version }}/libyang-cpp_*.deb \
+    #                  $(Build.ArtifactStagingDirectory)/download/target/debs/${{ parameters.debian_version }}/python3-yang_*.deb
+    #   workingDirectory: $(Build.ArtifactStagingDirectory)
+    #   displayName: "Install yang deb from common lib"
     - task: DownloadPipelineArtifact@2
       inputs:
         source: specific
@@ -194,51 +195,53 @@ stages:
       archive_gcov: true
       debian_version: ${{ parameters.debian_version }}
 
-- stage: BuildArm
-  dependsOn: Build
-  condition: succeeded('Build')
-  jobs:
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: armhf
-      timeout: 180
-      pool: sonicso1ES-armhf
-      artifact_name: sonic-swss-common-${{ parameters.debian_version }}.armhf
-      debian_version: ${{ parameters.debian_version }}
+# ARM builds commented out - no hardware available
+# - stage: BuildArm
+#   dependsOn: Build
+#   condition: succeeded('Build')
+#   jobs:
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: armhf
+#       timeout: 180
+#       pool: sonic-build
+#       artifact_name: sonic-swss-common-${{ parameters.debian_version }}.armhf
+#       debian_version: ${{ parameters.debian_version }}
+#
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: arm64
+#       timeout: 180
+#       pool: sonic-build
+#       artifact_name: sonic-swss-common-${{ parameters.debian_version }}.arm64
+#       debian_version: ${{ parameters.debian_version }}
 
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: arm64
-      timeout: 180
-      pool: sonicso1ES-arm64
-      artifact_name: sonic-swss-common-${{ parameters.debian_version }}.arm64
-      debian_version: ${{ parameters.debian_version }}
-
-- stage: BuildTrixie
-  dependsOn: BuildArm
-  condition: succeeded('BuildArm')
-  jobs:
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: amd64
-      artifact_name: sonic-swss-common-trixie
-      debian_version: trixie
-
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: armhf
-      timeout: 180
-      pool: sonicso1ES-armhf
-      artifact_name: sonic-swss-common-trixie.armhf
-      debian_version: trixie
-
-  - template: .azure-pipelines/build-template.yml
-    parameters:
-      arch: arm64
-      timeout: 180
-      pool: sonicso1ES-arm64
-      artifact_name: sonic-swss-common-trixie.arm64
-      debian_version: trixie
+# Trixie builds commented out - depends on ARM builds
+# - stage: BuildTrixie
+#   dependsOn: BuildArm
+#   condition: succeeded('BuildArm')
+#   jobs:
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: amd64
+#       artifact_name: sonic-swss-common-trixie
+#       debian_version: trixie
+#
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: armhf
+#       timeout: 180
+#       pool: sonic-build
+#       artifact_name: sonic-swss-common-trixie.armhf
+#       debian_version: trixie
+#
+#   - template: .azure-pipelines/build-template.yml
+#     parameters:
+#       arch: arm64
+#       timeout: 180
+#       pool: sonic-build
+#       artifact_name: sonic-swss-common-trixie.arm64
+#       debian_version: trixie
 
 - stage: BuildSairedis
   dependsOn: Build
@@ -259,7 +262,7 @@ stages:
   - template: .azure-pipelines/build-swss-template.yml
     parameters:
       arch: amd64
-      pool: sonicso1ES-amd64
+      pool: sonic-build
       swss_common_artifact_name: sonic-swss-common-${{ parameters.debian_version }}
       sairedis_artifact_name: sonic-sairedis-${{ parameters.debian_version }}
       artifact_name: sonic-swss-${{ parameters.debian_version }}
@@ -276,11 +279,12 @@ stages:
       swss_artifact_name: sonic-swss-${{ parameters.debian_version }}
       artifact_name: docker-sonic-vs
 
-- stage: Test
-  dependsOn: BuildDocker
-  condition: succeeded('BuildDocker')
-  jobs:
-  - template: .azure-pipelines/test-docker-sonic-vs-template.yml
-    parameters:
-      log_artifact_name: log
-      debian_version: ${{ parameters.debian_version }}
+# Test stage commented out - uses sonictest pool requiring SSH/KVM integration tests not available
+# - stage: Test
+#   dependsOn: BuildDocker
+#   condition: succeeded('BuildDocker')
+#   jobs:
+#   - template: .azure-pipelines/test-docker-sonic-vs-template.yml
+#     parameters:
+#       log_artifact_name: log
+#       debian_version: ${{ parameters.debian_version }}

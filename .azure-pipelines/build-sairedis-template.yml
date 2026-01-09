@@ -9,6 +9,7 @@ parameters:
 - name: pool
   type: string
   values:
+  - sonic-build
   - sonicso1ES-amd64
   - default
   default: default
@@ -89,24 +90,25 @@ jobs:
       sudo rsyslogd
 
     displayName: "Install dependencies"
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      source: specific
-      project: build
-      pipeline: Azure.sonic-buildimage.common_libs
-      runVersion: 'latestFromBranch'
-      runBranch: 'refs/heads/$(BUILD_BRANCH)'
-      path: $(Build.ArtifactStagingDirectory)/download
-      artifact: common-lib
-      patterns: |
-        target/debs/${{ parameters.debian_version }}/libyang-*_1.0*.deb
-        target/debs/${{ parameters.debian_version }}/libyang_1.0*.deb
-    displayName: "Download libyang from common lib"
-  - script: |
-      set -ex
-      sudo dpkg -i $(find ./download -name *.deb)
-    workingDirectory: $(Build.ArtifactStagingDirectory)
-    displayName: "Install libyang from common lib"
+  # External pipeline download commented out - pipeline not available in Cisco-SONiC-PoC org
+  # - task: DownloadPipelineArtifact@2
+  #   inputs:
+  #     source: specific
+  #     project: build
+  #     pipeline: Azure.sonic-buildimage.common_libs
+  #     runVersion: 'latestFromBranch'
+  #     runBranch: 'refs/heads/$(BUILD_BRANCH)'
+  #     path: $(Build.ArtifactStagingDirectory)/download
+  #     artifact: common-lib
+  #     patterns: |
+  #       target/debs/${{ parameters.debian_version }}/libyang-*_1.0*.deb
+  #       target/debs/${{ parameters.debian_version }}/libyang_1.0*.deb
+  #   displayName: "Download libyang from common lib"
+  # - script: |
+  #     set -ex
+  #     sudo dpkg -i $(find ./download -name *.deb)
+  #   workingDirectory: $(Build.ArtifactStagingDirectory)
+  #   displayName: "Install libyang from common lib"
   - task: DownloadPipelineArtifact@2
     inputs:
       artifact: ${{ parameters.swss_common_artifact_name }}
